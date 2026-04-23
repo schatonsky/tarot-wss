@@ -1,4 +1,4 @@
-const CACHE = 'tarot-wss-v2';
+const CACHE = 'tarot-wss-v3';
 const ASSETS = [
   './',
   './index.html',

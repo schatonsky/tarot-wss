@@ -421,8 +421,8 @@
     background: var(--bg);
     overflow: hidden;
     cursor: pointer;
-    animation: splashFadeOut 0.5s 1.9s forwards;
   }
+  .splash.fading { animation: splashFadeOut 0.45s forwards; }
   .splash-bg {
     position: absolute; inset: 0;
     background: url('photo.jpg') center/cover no-repeat;
@@ -1597,9 +1597,11 @@ function showSplash() {
       <span class="tag">La team</span>
     </div>
   `;
-  s.addEventListener('click', () => s.remove());
+  s.addEventListener('click', () => {
+    s.classList.add('fading');
+    setTimeout(() => s.remove(), 450);
+  });
   document.body.appendChild(s);
-  setTimeout(() => { if (s.parentNode) s.remove(); }, 2500);
 }
 
 // ========= Init =========
