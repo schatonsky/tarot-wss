@@ -412,6 +412,66 @@
   /* History item clickable */
   .history-item { cursor: pointer; transition: background 0.1s; }
   .history-item:hover, .history-item:active { background: var(--surface-3); }
+
+  /* Splash d'accueil (photo de la team) */
+  .splash {
+    position: fixed; inset: 0;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    overflow: hidden;
+    cursor: pointer;
+    animation: splashFadeOut 0.5s 1.9s forwards;
+  }
+  .splash-bg {
+    position: absolute; inset: 0;
+    background: url('photo.jpg') center/cover no-repeat;
+    animation: splashZoom 2.5s ease-out forwards;
+  }
+  .splash-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(15,23,42,0.25) 0%, rgba(15,23,42,0.35) 50%, rgba(15,23,42,0.92) 100%);
+  }
+  .splash-content {
+    position: relative;
+    text-align: center;
+    color: white;
+    padding: 28px;
+    animation: splashContentIn 0.7s 0.25s backwards;
+    max-width: 420px;
+  }
+  .splash-card-emoji { font-size: 44px; margin-bottom: 10px; line-height: 1; }
+  .splash-content h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    margin: 0 0 8px;
+    line-height: 1.15;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.75);
+  }
+  .splash-content .tag {
+    display: inline-block;
+    background: rgba(139,92,246,0.85);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+  }
+  @keyframes splashZoom {
+    from { transform: scale(1.1); }
+    to   { transform: scale(1); }
+  }
+  @keyframes splashContentIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes splashFadeOut {
+    to { opacity: 0; pointer-events: none; }
+  }
 </style>
 </head>
 <body>
@@ -1008,6 +1068,7 @@ function renderReglages() {
         <span>Son à la validation</span>
         <div class="switch ${state.options.son ? 'on' : ''}" data-action="toggle-son" role="switch" aria-checked="${state.options.son}"></div>
       </div>
+      <button class="secondary" style="margin-top:12px" data-action="show-splash">Revoir l'accueil</button>
     </div>
 
     <div class="card">
@@ -1359,6 +1420,9 @@ document.addEventListener('click', (e) => {
     state.options.son = !state.options.son;
     saveState(); render();
   }
+  else if (action === 'show-splash') {
+    showSplash();
+  }
 
   // Nouvelle donne
   else if (action === 'annuler-donne') {
@@ -1517,9 +1581,31 @@ function attachDragAndDrop() {
   });
 }
 
+// ========= Splash =========
+
+function showSplash() {
+  const existing = document.querySelector('.splash');
+  if (existing) existing.remove();
+  const s = document.createElement('div');
+  s.className = 'splash';
+  s.innerHTML = `
+    <div class="splash-bg"></div>
+    <div class="splash-overlay"></div>
+    <div class="splash-content">
+      <div class="splash-card-emoji">🃏</div>
+      <h1>Tarot World<br>Summer Series</h1>
+      <span class="tag">La team</span>
+    </div>
+  `;
+  s.addEventListener('click', () => s.remove());
+  document.body.appendChild(s);
+  setTimeout(() => { if (s.parentNode) s.remove(); }, 2500);
+}
+
 // ========= Init =========
 
 render();
+showSplash();
 
 // Service worker pour fonctionnement offline
 if ('serviceWorker' in navigator) {

@@ -1,4 +1,4 @@
-const CACHE = 'tarot-wss-v1';
+const CACHE = 'tarot-wss-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const ASSETS = [
   './icon-512.png',
   './icon-maskable-512.png',
   './favicon-32.png',
+  './photo.jpg',
 ];
 
 self.addEventListener('install', (e) => {
