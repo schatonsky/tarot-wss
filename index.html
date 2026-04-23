@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tarot WSS">
+<title>Tarot World Summer Series</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #334155;
+    --surface-3: #475569;
+    --border: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { overscroll-behavior-y: contain; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+    line-height: 1.4;
+  }
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; }
+  h2 { font-size: 13px; margin: 0 0 8px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+  h3 { font-size: 16px; margin: 0 0 12px; }
+  p { margin: 0; }
+
+  .card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+
+  input, select, button, textarea {
+    font: inherit;
+    color: inherit;
+  }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 16px;
+  }
+  input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -2px; }
+  label { display: block; }
+
+  button {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    transition: background 0.1s, transform 0.1s;
+  }
+  button:active { transform: scale(0.98); }
+  button:hover { background: var(--primary-hover); }
+  button.secondary { background: var(--surface-2); color: var(--text); }
+  button.secondary:hover { background: var(--surface-3); }
+  button.danger { background: var(--danger); }
+  button.ghost { background: transparent; color: var(--muted); }
+  button.small { padding: 8px 12px; font-size: 14px; width: auto; }
+  button.icon {
+    width: 38px; height: 38px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row + .row { margin-top: 8px; }
+  .stack > * + * { margin-top: 12px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .muted { color: var(--muted); font-size: 14px; }
+  .mini { font-size: 12px; color: var(--muted); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .chip.disabled {
+    opacity: 0.5; cursor: not-allowed;
+  }
+  .chip-seg {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .chip-seg button {
+    flex: 1;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px 6px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .chip-seg button.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .scoreboard { display: flex; flex-direction: column; gap: 8px; }
+  .score-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: 10px;
+  }
+  .score-row .rank { color: var(--muted); font-weight: 700; text-align: center; }
+  .score-row .name { font-weight: 500; }
+  .score-row .score {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 19px;
+  }
+  .score.pos { color: var(--success); }
+  .score.neg { color: var(--danger); }
+  .score.zero { color: var(--muted); }
+  .score-row.sitting { opacity: 0.45; }
+  .score-row.sitting .name::after {
+    content: ' • hors jeu';
+    color: var(--warning);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .history-item {
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .history-item .h-title {
+    display: flex; justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .history-item .h-details {
+    font-size: 13px; color: var(--muted);
+  }
+  .history-item .h-scores {
+    margin-top: 6px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-size: 13px;
+  }
+  .history-item .h-scores span {
+    padding: 2px 8px; background: var(--surface-3); border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .result-card {
+    background: linear-gradient(180deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05));
+    border: 1.5px solid var(--primary);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .result-row {
+    display: flex; justify-content: space-between; padding: 3px 0;
+    font-size: 14px;
+  }
+  .result-row.main {
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 8px;
+    font-size: 16px;
+  }
+
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 0;
+    z-index: 100;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px 16px 0 0;
+    max-width: 640px;
+    width: 100%;
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  @media (min-width: 640px) {
+    .overlay { align-items: center; padding: 16px; }
+    .modal { border-radius: 16px; max-height: 90vh; }
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .player-row .drag-handle {
+    color: var(--muted); font-size: 20px; cursor: grab;
+    padding: 0 4px;
+    user-select: none;
+  }
+  .player-row input {
+    background: transparent; border: none; padding: 8px 4px;
+    flex: 1;
+  }
+  .player-row input:focus { outline: none; }
+  .player-row.dragging { opacity: 0.4; }
+  .player-row.drag-over { border-top: 2px solid var(--primary); }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    font-size: 14px;
+  }
+  .info-grid dt { color: var(--muted); }
+  .info-grid dd { margin: 0; font-weight: 500; }
+
+  .cible-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--warning);
+    margin-top: 4px;
+  }
+  .echec { color: var(--danger); }
+  .reussi { color: var(--success); }
+
+  .fab {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: 50%;
+    transform: translateX(min(312px, 50vw - 24px));
+    width: 56px; height: 56px;
+    border-radius: 28px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    cursor: pointer;
+    font-size: 26px;
+    color: white;
+    border: none;
+    padding: 0;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+  }
+  .empty .emoji { font-size: 36px; margin-bottom: 8px; }
+
+  details { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  details summary { cursor: pointer; font-weight: 500; font-size: 14px; }
+  details[open] summary { margin-bottom: 8px; }
+
+  .toast {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-3);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Modal close-button override */
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .modal-header h2 {
+    margin: 0; text-transform: none; letter-spacing: 0;
+    font-size: 18px; color: var(--text); font-weight: 700;
+  }
+
+  /* Animation de célébration */
+  .celebrate {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.55);
+    z-index: 300;
+    pointer-events: none;
+    animation: celebrateFade 1.3s forwards;
+  }
+  .celebrate-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 28px 40px;
+    text-align: center;
+    border: 2px solid var(--primary);
+    box-shadow: 0 12px 40px rgba(139,92,246,0.5);
+    animation: celebrateIn 0.35s cubic-bezier(.2,1.4,.5,1);
+    min-width: 220px;
+  }
+  .celebrate-emoji { font-size: 46px; line-height: 1; margin-bottom: 6px; }
+  .celebrate-score {
+    font-size: 46px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+  .celebrate-label { color: var(--muted); font-size: 14px; }
+  @keyframes celebrateIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes celebrateFade {
+    0%, 55% { opacity: 1; }
+    100% { opacity: 0; transform: scale(1.05); }
+  }
+
+  .confetti {
+    position: absolute; pointer-events: none;
+    font-size: 22px;
+    animation: confettiFall 1.3s linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.2; }
+  }
+
+  /* Options row (toggle) */
+  .option-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0;
+  }
+  .switch {
+    position: relative;
+    width: 46px; height: 26px;
+    background: var(--surface-3);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: ''; position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.15s;
+  }
+  .switch.on { background: var(--primary); }
+  .switch.on::after { transform: translateX(20px); }
+
+  /* History item clickable */
+  .history-item { cursor: pointer; transition: background 0.1s; }
+  .history-item:hover, .history-item:active { background: var(--surface-3); }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+
+// ========= Constantes =========
+
+const STORAGE_KEY = 'tarot-score-v1';
+
+const CONTRATS = {
+  petite:      { label: 'Petite',       mult: 1 },
+  garde:       { label: 'Garde',        mult: 2 },
+  gardeSans:   { label: 'Garde sans',   mult: 4 },
+  gardeContre: { label: 'Garde contre', mult: 6 },
+};
+
+// Cibles de points selon le nombre de bouts
+const CIBLES = [56, 51, 41, 36];
+
+const POIGNEE = {
+  aucune: { label: 'Aucune',      bonus: 0  },
+  simple: { label: 'Simple (+20)', bonus: 20 },
+  double: { label: 'Double (+30)', bonus: 30 },
+  triple: { label: 'Triple (+40)', bonus: 40 },
+};
+
+const CHELEM = {
+  aucun:            { label: 'Aucun',               bonus: 0 },
+  annonceReussi:    { label: 'Annoncé réussi',      bonus: 400 },
+  nonAnnonceReussi: { label: 'Non annoncé réussi',  bonus: 200 },
+  annonceManque:    { label: 'Annoncé manqué',      bonus: -200 },
+};
+
+const PETIT_AU_BOUT = {
+  aucun:   { label: 'Aucun',   sign: 0 },
+  preneur: { label: 'Preneur', sign: 1 },
+  defense: { label: 'Défense', sign: -1 },
+};
+
+// ========= État =========
+
+function defaultState() {
+  return {
+    configured: false,
+    joueurs: [],
+    nbTable: 4,
+    rotationIndex: 0,
+    donnes: [],
+    view: 'home',
+    draft: null, // formulaire en cours
+    modal: null, // { type: 'donne', donneId } | null
+    options: { son: false },
+  };
+}
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      return { ...defaultState(), ...s };
+    }
+  } catch (e) {}
+  return defaultState();
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function setState(patch) {
+  state = { ...state, ...patch };
+  saveState();
+  render();
+}
+
+// ========= Utilitaires =========
+
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function joueurParId(id) {
+  return state.joueurs.find(j => j.id === id);
+}
+
+function nomDe(id) {
+  const j = joueurParId(id);
+  return j ? j.nom : '?';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ========= Calcul du score =========
+
+function calculerScore(donne, joueursTable, nbTable) {
+  const mult = CONTRATS[donne.contrat].mult;
+  const cible = CIBLES[donne.bouts];
+  const ecart = donne.points - cible;
+  const absEcart = Math.abs(ecart);
+  const reussi = ecart >= 0;
+  const sign = reussi ? 1 : -1;
+
+  // Base : (25 + |écart|) × contrat, signée selon la réussite
+  const base = sign * (25 + absEcart) * mult;
+
+  // Petit au bout : 10 × contrat, signé selon le camp qui l'a réalisé
+  const petitSign = PETIT_AU_BOUT[donne.petitAuBout].sign;
+  const petitBonus = petitSign * 10 * mult;
+
+  // Poignée : bonus fixe au camp vainqueur de la donne (= preneur si réussi)
+  const poigneeBonus = POIGNEE[donne.poignee].bonus * sign;
+
+  // Chelem : déjà signé du point de vue du preneur
+  const chelemBonus = CHELEM[donne.chelem].bonus;
+
+  // Montant net de la donne, côté preneur, par défenseur
+  const M = base + petitBonus + poigneeBonus + chelemBonus;
+
+  const scores = {};
+  joueursTable.forEach(id => scores[id] = 0);
+
+  const preneurId = donne.preneur;
+  const appeleId = donne.appele;
+  const solo = nbTable === 5 && (!appeleId || appeleId === preneurId);
+
+  if (nbTable === 5 && !solo) {
+    scores[preneurId] = 2 * M;
+    scores[appeleId] = M;
+    joueursTable.forEach(id => { if (id !== preneurId && id !== appeleId) scores[id] = -M; });
+  } else if (nbTable === 5 && solo) {
+    scores[preneurId] = 4 * M;
+    joueursTable.forEach(id => { if (id !== preneurId) scores[id] = -M; });
+  } else if (nbTable === 4) {
+    scores[preneurId] = 3 * M;
+    joueursTable.forEach(id => { if (id !== preneurId) scores[id] = -M; });
+  } else if (nbTable === 3) {
+    scores[preneurId] = 2 * M;
+    joueursTable.forEach(id => { if (id !== preneurId) scores[id] = -M; });
+  }
+
+  return {
+    M, base, petitBonus, poigneeBonus, chelemBonus,
+    ecart, cible, reussi, solo,
+    scores,
+  };
+}
+
+function getTotaux() {
+  const t = {};
+  state.joueurs.forEach(j => t[j.id] = 0);
+  state.donnes.forEach(d => {
+    Object.entries(d.scores || {}).forEach(([id, pts]) => {
+      if (t[id] !== undefined) t[id] += pts;
+    });
+  });
+  return t;
+}
+
+function getProchaineComposition() {
+  const n = state.joueurs.length;
+  const nbTable = state.nbTable;
+  if (n <= nbTable) {
+    return { aTable: state.joueurs.map(j => j.id), horsJeu: [] };
+  }
+  const nbHors = n - nbTable;
+  const aTable = [];
+  const horsJeu = [];
+  for (let i = 0; i < n; i++) {
+    const idx = (state.rotationIndex + i) % n;
+    if (i < nbHors) horsJeu.push(state.joueurs[idx].id);
+    else aTable.push(state.joueurs[idx].id);
+  }
+  return { aTable, horsJeu };
+}
+
+// ========= Vue : Setup =========
+
+function renderSetup() {
+  if (state.joueurs.length === 0) {
+    state.joueurs = [
+      { id: uid(), nom: '' },
+      { id: uid(), nom: '' },
+      { id: uid(), nom: '' },
+      { id: uid(), nom: '' },
+    ];
+  }
+
+  const joueursHtml = state.joueurs.map((j, i) => `
+    <div class="player-row" draggable="true" data-idx="${i}">
+      <span class="drag-handle">⋮⋮</span>
+      <input type="text" value="${escapeHtml(j.nom)}" placeholder="Joueur ${i + 1}" data-action="edit-name" data-id="${j.id}">
+      <button class="icon secondary" data-action="remove-player" data-id="${j.id}" ${state.joueurs.length <= 3 ? 'disabled' : ''}>✕</button>
+    </div>
+  `).join('');
+
+  const nbOptions = [3, 4, 5].map(n => `
+    <button class="${state.nbTable === n ? 'active' : ''}" data-action="set-nbtable" data-n="${n}">${n} joueurs</button>
+  `).join('');
+
+  return `
+    <div class="header">
+      <h1>🃏 Tarot WSS</h1>
+    </div>
+    <p class="mini" style="text-align:center;margin:-6px 0 14px">Tarot World Summer Series</p>
+
+    <div class="card">
+      <h2>Joueurs inscrits</h2>
+      <div id="players-list">${joueursHtml}</div>
+      <button class="secondary" data-action="add-player" style="margin-top:8px">+ Ajouter un joueur</button>
+      <p class="mini" style="margin-top:10px">Ordre de la rotation : glisser ⋮⋮ pour réorganiser. Le premier de la liste sera hors jeu en premier (si besoin).</p>
+    </div>
+
+    <div class="card">
+      <h2>Joueurs à table</h2>
+      <div class="chip-seg">${nbOptions}</div>
+      <p class="mini" style="margin-top:8px">
+        ${state.joueurs.length > state.nbTable
+          ? `${state.joueurs.length - state.nbTable} joueur(s) hors jeu par donne — rotation automatique.`
+          : state.joueurs.length === state.nbTable
+            ? `Tout le monde joue chaque donne.`
+            : `⚠️ Pas assez de joueurs : ajoutez-en ${state.nbTable - state.joueurs.length}.`}
+      </p>
+    </div>
+
+    <button data-action="commencer" ${state.joueurs.filter(j => j.nom.trim()).length < state.nbTable ? 'disabled' : ''}>
+      Commencer la partie
+    </button>
+
+    ${state.donnes.length > 0 ? `
+      <p class="mini" style="text-align:center;margin-top:12px">
+        <button class="ghost small" data-action="retour-home">Annuler les modifications</button>
+      </p>` : ''}
+  `;
+}
+
+// ========= Vue : Home =========
+
+function renderHome() {
+  const totaux = getTotaux();
+  const classement = [...state.joueurs].sort((a, b) => totaux[b.id] - totaux[a.id]);
+  const compo = getProchaineComposition();
+  const horsJeuSet = new Set(compo.horsJeu);
+
+  const scoresHtml = classement.map((j, i) => {
+    const pts = totaux[j.id];
+    const cls = pts > 0 ? 'pos' : pts < 0 ? 'neg' : 'zero';
+    const sitting = horsJeuSet.has(j.id);
+    return `
+      <div class="score-row ${sitting ? 'sitting' : ''}">
+        <span class="rank">${i + 1}</span>
+        <span class="name">${escapeHtml(j.nom)}</span>
+        <span class="score ${cls}">${pts > 0 ? '+' : ''}${pts}</span>
+      </div>
+    `;
+  }).join('');
+
+  const nbDonnes = state.donnes.length;
+  const historique = [...state.donnes].reverse().slice(0, 8).map((d, idx) => {
+    const numero = state.donnes.length - idx;
+    const mult = CONTRATS[d.contrat].mult;
+    const cible = CIBLES[d.bouts];
+    const preneurName = nomDe(d.preneur);
+    const appeleName = d.appele && d.appele !== d.preneur ? ` + ${nomDe(d.appele)}` : '';
+    const solo = state.nbTable === 5 && (!d.appele || d.appele === d.preneur);
+    const reussi = d.points >= cible;
+    const M = d.scores[d.preneur] / (
+      state.nbTable === 5 ? (solo ? 4 : 2) :
+      state.nbTable === 4 ? 3 : 2
+    );
+    const scoresChips = Object.entries(d.scores).map(([id, pts]) => {
+      const cls = pts > 0 ? 'pos' : pts < 0 ? 'neg' : 'zero';
+      return `<span class="${cls}" style="color:inherit">${escapeHtml(nomDe(id))} ${pts > 0 ? '+' : ''}${pts}</span>`;
+    }).join('');
+    return `
+      <div class="history-item" data-action="show-donne" data-idx="${state.donnes.length - 1 - idx}">
+        <div class="h-title">
+          <span>Donne ${numero} — ${escapeHtml(preneurName)}${escapeHtml(appeleName)}</span>
+          <span class="${reussi ? 'reussi' : 'echec'}">${reussi ? '✓' : '✗'} ${M > 0 ? '+' : ''}${M}</span>
+        </div>
+        <div class="h-details">
+          ${CONTRATS[d.contrat].label} · ${d.bouts} bout${d.bouts > 1 ? 's' : ''} · ${d.points} pts (cible ${cible})
+          ${d.petitAuBout !== 'aucun' ? ' · petit au bout' : ''}
+          ${d.poignee !== 'aucune' ? ' · ' + POIGNEE[d.poignee].label.toLowerCase() : ''}
+          ${d.chelem !== 'aucun' ? ' · ' + CHELEM[d.chelem].label.toLowerCase() : ''}
+        </div>
+        <div class="h-scores">${scoresChips}</div>
+      </div>
+    `;
+  }).join('');
+
+  const prochaineHtml = state.joueurs.length > state.nbTable ? `
+    <div class="card">
+      <h2>Prochaine donne</h2>
+      <div class="info-grid">
+        <dt>À table</dt>
+        <dd>${compo.aTable.map(id => escapeHtml(nomDe(id))).join(', ')}</dd>
+        <dt>Hors jeu</dt>
+        <dd style="color:var(--warning)">${compo.horsJeu.map(id => escapeHtml(nomDe(id))).join(', ') || '—'}</dd>
+      </div>
+      <button class="secondary small" style="margin-top:10px" data-action="avancer-rotation">↻ Avancer la rotation</button>
+    </div>
+  ` : '';
+
+  return `
+    <div class="header">
+      <h1>🃏 Tarot WSS</h1>
+      <div class="row" style="gap:6px">
+        <button class="icon secondary" data-action="ouvrir-stats" title="Statistiques">📊</button>
+        <button class="icon secondary" data-action="exporter" title="Partager">⤴</button>
+        <button class="icon secondary" data-action="ouvrir-reglages" title="Réglages">⚙</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Classement · ${nbDonnes} donne${nbDonnes > 1 ? 's' : ''}</h2>
+      <div class="scoreboard">${scoresHtml}</div>
+    </div>
+
+    ${prochaineHtml}
+
+    <button data-action="nouvelle-donne" style="margin-bottom:16px">+ Nouvelle donne</button>
+
+    ${nbDonnes > 0 ? `
+      <div class="card">
+        <h2>Historique</h2>
+        ${historique}
+        ${nbDonnes > 8 ? `<p class="mini" style="text-align:center;margin-top:8px">…et ${nbDonnes - 8} donne(s) plus anciennes</p>` : ''}
+      </div>
+    ` : `
+      <div class="card empty">
+        <div class="emoji">🎴</div>
+        <p>Aucune donne jouée.<br>Appuie sur <b>Nouvelle donne</b> pour commencer.</p>
+      </div>
+    `}
+  `;
+}
+
+// ========= Vue : Nouvelle donne =========
+
+function newDraft() {
+  const compo = getProchaineComposition();
+  return {
+    joueursTable: [...compo.aTable],
+    horsJeu: [...compo.horsJeu],
+    preneur: null,
+    appele: null,
+    contrat: 'garde',
+    points: 41,
+    bouts: 1,
+    petitAuBout: 'aucun',
+    poignee: 'aucune',
+    chelem: 'aucun',
+  };
+}
+
+function renderNouvelleDonne() {
+  if (!state.draft) state.draft = newDraft();
+  const d = state.draft;
+  const nbTable = state.nbTable;
+
+  // Sélection hors-jeu (si applicable)
+  const horsJeuHtml = state.joueurs.length > nbTable ? `
+    <div class="card">
+      <h2>Qui joue cette donne ?</h2>
+      <div class="chip-row">
+        ${state.joueurs.map(j => {
+          const inTable = d.joueursTable.includes(j.id);
+          return `<span class="chip ${inTable ? 'active' : ''}" data-action="toggle-table" data-id="${j.id}">${escapeHtml(j.nom)}</span>`;
+        }).join('')}
+      </div>
+      <p class="mini" style="margin-top:8px">
+        À table : ${d.joueursTable.length}/${nbTable}.
+        ${d.joueursTable.length !== nbTable ? `<span style="color:var(--warning)">Sélectionne exactement ${nbTable} joueurs.</span>` : ''}
+      </p>
+    </div>
+  ` : '';
+
+  // Preneur
+  const preneurHtml = `
+    <div class="card">
+      <h2>Preneur</h2>
+      <div class="chip-row">
+        ${d.joueursTable.map(id => `
+          <span class="chip ${d.preneur === id ? 'active' : ''}" data-action="set-preneur" data-id="${id}">${escapeHtml(nomDe(id))}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Appelé (à 5)
+  const appeleHtml = nbTable === 5 && d.preneur ? `
+    <div class="card">
+      <h2>Appelé (roi)</h2>
+      <div class="chip-row">
+        ${d.joueursTable.map(id => `
+          <span class="chip ${d.appele === id ? 'active' : ''}" data-action="set-appele" data-id="${id}">
+            ${escapeHtml(nomDe(id))}${id === d.preneur ? ' (solo)' : ''}
+          </span>
+        `).join('')}
+      </div>
+      <p class="mini" style="margin-top:8px">Sélectionner le preneur = jeu en solo (preneur seul contre les 4 autres).</p>
+    </div>
+  ` : '';
+
+  // Contrat
+  const contratHtml = `
+    <div class="card">
+      <h2>Contrat</h2>
+      <div class="chip-row">
+        ${Object.entries(CONTRATS).map(([k, v]) => `
+          <span class="chip ${d.contrat === k ? 'active' : ''}" data-action="set-contrat" data-k="${k}">${v.label} ×${v.mult}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Bouts + points
+  const cible = CIBLES[d.bouts];
+  const ecart = d.points - cible;
+  const reussi = ecart >= 0;
+
+  const boutsHtml = `
+    <div class="card">
+      <h2>Bouts du preneur</h2>
+      <div class="chip-seg">
+        ${[0, 1, 2, 3].map(n => `
+          <button class="${d.bouts === n ? 'active' : ''}" data-action="set-bouts" data-n="${n}">${n}</button>
+        `).join('')}
+      </div>
+      <p class="cible-hint">Cible : <b>${cible}</b> points</p>
+    </div>
+  `;
+
+  const pointsHtml = `
+    <div class="card">
+      <h2>Points du preneur</h2>
+      <input type="number" min="0" max="91" step="0.5" value="${d.points}" data-action="set-points">
+      <div class="row" style="margin-top:8px; justify-content:space-between">
+        <span class="mini">Écart : ${ecart > 0 ? '+' : ''}${ecart}</span>
+        <span class="mini ${reussi ? 'reussi' : 'echec'}">${reussi ? '✓ Réussi' : '✗ Chuté'}</span>
+      </div>
+    </div>
+  `;
+
+  // Petit au bout
+  const petitHtml = `
+    <div class="card">
+      <h2>Petit au bout</h2>
+      <div class="chip-row">
+        ${Object.entries(PETIT_AU_BOUT).map(([k, v]) => `
+          <span class="chip ${d.petitAuBout === k ? 'active' : ''}" data-action="set-petit" data-k="${k}">${v.label}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Poignée
+  const poigneeHtml = `
+    <div class="card">
+      <h2>Poignée</h2>
+      <div class="chip-row">
+        ${Object.entries(POIGNEE).map(([k, v]) => `
+          <span class="chip ${d.poignee === k ? 'active' : ''}" data-action="set-poignee" data-k="${k}">${v.label}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Chelem
+  const chelemHtml = `
+    <div class="card">
+      <h2>Chelem</h2>
+      <div class="chip-row">
+        ${Object.entries(CHELEM).map(([k, v]) => `
+          <span class="chip ${d.chelem === k ? 'active' : ''}" data-action="set-chelem" data-k="${k}">${v.label}${v.bonus !== 0 ? ` (${v.bonus > 0 ? '+' : ''}${v.bonus})` : ''}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Résultat (aperçu)
+  let resultatHtml = '';
+  const canCompute = d.preneur && d.joueursTable.length === nbTable && (nbTable !== 5 || d.appele);
+  if (canCompute) {
+    const r = calculerScore(d, d.joueursTable, nbTable);
+    const lignes = d.joueursTable.map(id => {
+      const p = r.scores[id];
+      const cls = p > 0 ? 'reussi' : p < 0 ? 'echec' : 'muted';
+      const isPreneur = id === d.preneur;
+      const isAppele = id === d.appele && id !== d.preneur && nbTable === 5;
+      const tag = isPreneur ? ' (preneur)' : isAppele ? ' (appelé)' : '';
+      return `<div class="result-row"><span>${escapeHtml(nomDe(id))}${tag}</span><span class="${cls}" style="font-weight:700">${p > 0 ? '+' : ''}${p}</span></div>`;
+    }).join('');
+    resultatHtml = `
+      <div class="card">
+        <h2>Résultat</h2>
+        <div class="result-card">
+          <details>
+            <summary class="mini">Détail du calcul</summary>
+            <div class="result-row"><span>(25 + ${Math.abs(r.ecart)}) × ${CONTRATS[d.contrat].mult}${r.reussi ? '' : ' (chute)'}</span><span>${r.base}</span></div>
+            ${r.petitBonus !== 0 ? `<div class="result-row"><span>Petit au bout</span><span>${r.petitBonus > 0 ? '+' : ''}${r.petitBonus}</span></div>` : ''}
+            ${r.poigneeBonus !== 0 ? `<div class="result-row"><span>Poignée</span><span>${r.poigneeBonus > 0 ? '+' : ''}${r.poigneeBonus}</span></div>` : ''}
+            ${r.chelemBonus !== 0 ? `<div class="result-row"><span>Chelem</span><span>${r.chelemBonus > 0 ? '+' : ''}${r.chelemBonus}</span></div>` : ''}
+            <div class="result-row main"><span>Montant M</span><span>${r.M > 0 ? '+' : ''}${r.M}</span></div>
+          </details>
+          <div style="margin-top:10px">${lignes}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  const numero = state.donnes.length + 1;
+  const canValider = canCompute;
+
+  return `
+    <div class="header">
+      <div class="row" style="gap:10px">
+        <button class="icon secondary" data-action="annuler-donne">←</button>
+        <h1>Donne ${numero}</h1>
+      </div>
+    </div>
+
+    ${horsJeuHtml}
+    ${preneurHtml}
+    ${appeleHtml}
+    ${contratHtml}
+    ${boutsHtml}
+    ${pointsHtml}
+    ${petitHtml}
+    ${poigneeHtml}
+    ${chelemHtml}
+    ${resultatHtml}
+
+    <div class="stack">
+      <button data-action="valider-donne" ${canValider ? '' : 'disabled'}>Valider la donne</button>
+      <button class="ghost" data-action="annuler-donne">Annuler</button>
+    </div>
+  `;
+}
+
+// ========= Vue : Réglages =========
+
+function renderReglages() {
+  return `
+    <div class="header">
+      <div class="row" style="gap:10px">
+        <button class="icon secondary" data-action="retour-home">←</button>
+        <h1>Réglages</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Joueurs</h2>
+      <p class="mini" style="margin-bottom:10px">Modifier les noms ou la rotation (glisser ⋮⋮).</p>
+      <div id="players-list">
+        ${state.joueurs.map((j, i) => `
+          <div class="player-row" draggable="true" data-idx="${i}">
+            <span class="drag-handle">⋮⋮</span>
+            <input type="text" value="${escapeHtml(j.nom)}" data-action="edit-name" data-id="${j.id}">
+            <button class="icon secondary" data-action="remove-player" data-id="${j.id}" ${state.joueurs.length <= 3 ? 'disabled' : ''}>✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="secondary" data-action="add-player" style="margin-top:8px">+ Ajouter un joueur</button>
+    </div>
+
+    <div class="card">
+      <h2>Joueurs à table</h2>
+      <div class="chip-seg">
+        ${[3, 4, 5].map(n => `
+          <button class="${state.nbTable === n ? 'active' : ''}" data-action="set-nbtable" data-n="${n}" ${state.donnes.length > 0 ? 'disabled' : ''}>${n}</button>
+        `).join('')}
+      </div>
+      ${state.donnes.length > 0 ? '<p class="mini" style="margin-top:8px;color:var(--warning)">Impossible de modifier : des donnes ont déjà été jouées.</p>' : ''}
+    </div>
+
+    <div class="card">
+      <h2>Options</h2>
+      <div class="option-row">
+        <span>Son à la validation</span>
+        <div class="switch ${state.options.son ? 'on' : ''}" data-action="toggle-son" role="switch" aria-checked="${state.options.son}"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Donnes</h2>
+      <p class="mini" style="margin-bottom:10px">${state.donnes.length} donne(s) jouée(s).</p>
+      <button class="secondary" data-action="exporter" style="margin-bottom:8px">Partager / exporter les scores</button>
+      <button class="secondary" data-action="supprimer-derniere" ${state.donnes.length === 0 ? 'disabled' : ''}>
+        Supprimer la dernière donne
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Partie</h2>
+      <button class="danger" data-action="reset-partie">Nouvelle partie (tout effacer)</button>
+    </div>
+  `;
+}
+
+// ========= Rendu =========
+
+function render() {
+  const app = document.getElementById('app');
+  let html = '';
+  if (!state.configured) html = renderSetup();
+  else if (state.view === 'nouvelle-donne') html = renderNouvelleDonne();
+  else if (state.view === 'stats') html = renderStats();
+  else if (state.view === 'reglages') html = renderReglages();
+  else html = renderHome();
+  if (state.modal) html += renderModal();
+  app.innerHTML = html;
+  attachDragAndDrop();
+}
+
+function renderModal() {
+  if (!state.modal) return '';
+  if (state.modal.type === 'donne') {
+    const d = state.donnes.find(x => x.id === state.modal.donneId);
+    if (!d) return '';
+    return renderDonneDetail(d);
+  }
+  return '';
+}
+
+// ========= Détail d'une donne (modal) =========
+
+function renderDonneDetail(d) {
+  const numero = state.donnes.findIndex(x => x.id === d.id) + 1;
+  const nbTable = d.joueursTable.length;
+  const mult = CONTRATS[d.contrat].mult;
+  const cible = CIBLES[d.bouts];
+  const ecart = d.points - cible;
+  const absEcart = Math.abs(ecart);
+  const reussi = ecart >= 0;
+  const sign = reussi ? 1 : -1;
+  const petitSign = PETIT_AU_BOUT[d.petitAuBout].sign;
+  const base = sign * (25 + absEcart) * mult;
+  const petitBonus = petitSign * 10 * mult;
+  const poigneeBonus = POIGNEE[d.poignee].bonus * sign;
+  const chelemBonus = CHELEM[d.chelem].bonus;
+  const M = base + petitBonus + poigneeBonus + chelemBonus;
+  const solo = nbTable === 5 && (!d.appele || d.appele === d.preneur);
+
+  const scoresHtml = Object.entries(d.scores).map(([id, pts]) => {
+    const cls = pts > 0 ? 'reussi' : pts < 0 ? 'echec' : 'muted';
+    const tag = id === d.preneur ? ' · preneur' : (id === d.appele && !solo ? ' · appelé' : '');
+    return `<div class="result-row" style="padding:6px 0"><span>${escapeHtml(nomDe(id))}<span class="mini">${tag}</span></span><span class="${cls}" style="font-weight:700">${pts > 0 ? '+' : ''}${pts}</span></div>`;
+  }).join('');
+
+  return `
+    <div class="overlay" data-action="close-modal">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Donne ${numero}</h2>
+          <button class="icon ghost" data-action="close-modal-btn">✕</button>
+        </div>
+        <div class="info-grid" style="margin-bottom:14px">
+          <dt>Preneur</dt><dd>${escapeHtml(nomDe(d.preneur))}</dd>
+          ${d.appele && !solo ? `<dt>Appelé</dt><dd>${escapeHtml(nomDe(d.appele))}</dd>` : ''}
+          ${solo ? `<dt>Mode</dt><dd>Solo</dd>` : ''}
+          <dt>Contrat</dt><dd>${CONTRATS[d.contrat].label} (×${mult})</dd>
+          <dt>Points</dt><dd>${d.points} / 91 · cible ${cible}</dd>
+          <dt>Résultat</dt><dd class="${reussi ? 'reussi' : 'echec'}">${ecart > 0 ? '+' : ''}${ecart} — ${reussi ? 'réussi' : 'chuté'}</dd>
+          <dt>Bouts</dt><dd>${d.bouts}</dd>
+          ${d.petitAuBout !== 'aucun' ? `<dt>Petit au bout</dt><dd>${PETIT_AU_BOUT[d.petitAuBout].label}</dd>` : ''}
+          ${d.poignee !== 'aucune' ? `<dt>Poignée</dt><dd>${POIGNEE[d.poignee].label}</dd>` : ''}
+          ${d.chelem !== 'aucun' ? `<dt>Chelem</dt><dd>${CHELEM[d.chelem].label}</dd>` : ''}
+          ${d.horsJeu && d.horsJeu.length > 0 ? `<dt>Hors jeu</dt><dd>${d.horsJeu.map(id => escapeHtml(nomDe(id))).join(', ')}</dd>` : ''}
+        </div>
+
+        <h3>Détail du calcul</h3>
+        <div class="result-card" style="margin-bottom:14px">
+          <div class="result-row"><span>(25 + ${absEcart}) × ${mult}${reussi ? '' : ' (chute)'}</span><span>${base}</span></div>
+          ${petitBonus !== 0 ? `<div class="result-row"><span>Petit au bout</span><span>${petitBonus > 0 ? '+' : ''}${petitBonus}</span></div>` : ''}
+          ${poigneeBonus !== 0 ? `<div class="result-row"><span>Poignée</span><span>${poigneeBonus > 0 ? '+' : ''}${poigneeBonus}</span></div>` : ''}
+          ${chelemBonus !== 0 ? `<div class="result-row"><span>Chelem</span><span>${chelemBonus > 0 ? '+' : ''}${chelemBonus}</span></div>` : ''}
+          <div class="result-row main"><span>Montant M</span><span>${M > 0 ? '+' : ''}${M}</span></div>
+        </div>
+
+        <h3>Scores</h3>
+        <div style="margin-bottom:16px">${scoresHtml}</div>
+
+        <button class="danger" data-action="delete-donne" data-id="${d.id}">Supprimer cette donne</button>
+      </div>
+    </div>
+  `;
+}
+
+// ========= Vue : Stats =========
+
+function getStatsJoueur(id) {
+  let totalScore = 0, donnesJouees = 0;
+  let donnesPreneur = 0, donnesPreneurReussi = 0;
+  let donnesAppele = 0, donnesSolo = 0;
+  let meilleureDonne = 0, pireDonne = 0;
+  state.donnes.forEach(d => {
+    const score = d.scores[id];
+    if (score === undefined) return;
+    donnesJouees++;
+    totalScore += score;
+    if (score > meilleureDonne) meilleureDonne = score;
+    if (score < pireDonne) pireDonne = score;
+    if (d.preneur === id) {
+      donnesPreneur++;
+      const solo = d.joueursTable.length === 5 && (!d.appele || d.appele === d.preneur);
+      if (solo) donnesSolo++;
+      const cible = CIBLES[d.bouts];
+      if (d.points >= cible) donnesPreneurReussi++;
+    }
+    if (d.appele === id && d.appele !== d.preneur) donnesAppele++;
+  });
+  const tauxReussite = donnesPreneur > 0 ? Math.round(100 * donnesPreneurReussi / donnesPreneur) : null;
+  const moyenne = donnesJouees > 0 ? totalScore / donnesJouees : 0;
+  return { totalScore, donnesJouees, donnesPreneur, donnesPreneurReussi, donnesAppele, donnesSolo, meilleureDonne, pireDonne, tauxReussite, moyenne };
+}
+
+function renderStats() {
+  const lignes = state.joueurs.map(j => ({ j, s: getStatsJoueur(j.id) }))
+    .sort((a, b) => b.s.totalScore - a.s.totalScore);
+
+  if (state.donnes.length === 0) {
+    return `
+      <div class="header">
+        <div class="row" style="gap:10px">
+          <button class="icon secondary" data-action="retour-home">←</button>
+          <h1>Statistiques</h1>
+        </div>
+      </div>
+      <div class="card empty">
+        <div class="emoji">📊</div>
+        <p>Aucune donne jouée pour l'instant.</p>
+      </div>
+    `;
+  }
+
+  const cards = lignes.map(({ j, s }, i) => {
+    const cls = s.totalScore > 0 ? 'pos' : s.totalScore < 0 ? 'neg' : 'zero';
+    return `
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0">${i + 1}. ${escapeHtml(j.nom)}</h3>
+          <span class="score ${cls}" style="font-size:22px">${s.totalScore > 0 ? '+' : ''}${s.totalScore}</span>
+        </div>
+        <div class="info-grid">
+          <dt>Donnes jouées</dt><dd>${s.donnesJouees}${s.donnesJouees > 0 ? ` · moy. ${s.moyenne.toFixed(1)}` : ''}</dd>
+          <dt>Prises</dt><dd>${s.donnesPreneur}${s.tauxReussite !== null ? ` · ${s.tauxReussite}% réussies` : ''}${s.donnesSolo > 0 ? ` · ${s.donnesSolo} solo` : ''}</dd>
+          ${s.donnesAppele > 0 ? `<dt>Fois appelé</dt><dd>${s.donnesAppele}</dd>` : ''}
+          ${s.meilleureDonne > 0 ? `<dt>Meilleure donne</dt><dd class="reussi">+${s.meilleureDonne}</dd>` : ''}
+          ${s.pireDonne < 0 ? `<dt>Pire donne</dt><dd class="echec">${s.pireDonne}</dd>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="header">
+      <div class="row" style="gap:10px">
+        <button class="icon secondary" data-action="retour-home">←</button>
+        <h1>Statistiques</h1>
+      </div>
+      <button class="icon secondary" data-action="exporter" title="Partager">⤴</button>
+    </div>
+    ${cards}
+  `;
+}
+
+// ========= Export / partage =========
+
+function genererTexteExport() {
+  const date = new Date().toLocaleDateString('fr-FR');
+  const totaux = getTotaux();
+  const classement = [...state.joueurs].sort((a, b) => totaux[b.id] - totaux[a.id]);
+  const maxLen = Math.max(4, ...classement.map(j => j.nom.length));
+  const lignes = classement.map((j, i) => {
+    const pts = totaux[j.id];
+    const nom = j.nom.padEnd(maxLen, ' ');
+    const s = (pts > 0 ? '+' : '') + pts;
+    return `${i + 1}. ${nom}  ${s.padStart(5, ' ')}`;
+  });
+  return `🃏 Tarot World Summer Series — ${date}\n${state.donnes.length} donne(s) · ${state.nbTable} à table\n\n${lignes.join('\n')}`;
+}
+
+async function exporter() {
+  const texte = genererTexteExport();
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: texte, title: 'Tarot — Scores' });
+      return;
+    } catch (e) { /* annulé */ }
+  }
+  try {
+    await navigator.clipboard.writeText(texte);
+    toast('Scores copiés');
+  } catch (e) {
+    prompt('Copie les scores :', texte);
+  }
+}
+
+// ========= Célébration + son =========
+
+let audioCtx = null;
+
+function jouerSon(type) {
+  if (!state.options.son) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const notes = type === 'reussi' ? [523.25, 659.25, 783.99]
+                : type === 'echec'  ? [392.00, 329.63]
+                : [440];
+    notes.forEach((f, i) => {
+      const t0 = now + i * 0.09;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.18, t0 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.3);
+    });
+  } catch (e) {}
+}
+
+function celebrer(preneurId, contratKey, M, reussi) {
+  const el = document.createElement('div');
+  el.className = 'celebrate';
+  const gros = Math.abs(M) >= 100 || reussi && M >= 75;
+  const emoji = reussi ? (gros ? '🎉' : '✨') : '💥';
+  const cls = reussi ? 'reussi' : 'echec';
+  el.innerHTML = `
+    <div class="celebrate-card">
+      <div class="celebrate-emoji">${emoji}</div>
+      <div class="celebrate-score ${cls}">${M > 0 ? '+' : ''}${M}</div>
+      <div class="celebrate-label">${escapeHtml(nomDe(preneurId))} · ${CONTRATS[contratKey].label}</div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  if (reussi && gros) {
+    const emojis = ['🎉','✨','🎊','🃏','⭐'];
+    for (let i = 0; i < 16; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.textContent = emojis[i % emojis.length];
+      c.style.left = (5 + Math.random() * 90) + 'vw';
+      c.style.animationDelay = (Math.random() * 0.3) + 's';
+      c.style.animationDuration = (1.1 + Math.random() * 0.6) + 's';
+      el.appendChild(c);
+    }
+  }
+
+  setTimeout(() => el.remove(), 1400);
+  jouerSon(reussi ? 'reussi' : 'echec');
+}
+
+// ========= Événements =========
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+
+  // Setup
+  if (action === 'add-player') {
+    state.joueurs.push({ id: uid(), nom: '' });
+    saveState(); render();
+  }
+  else if (action === 'remove-player') {
+    const id = btn.dataset.id;
+    state.joueurs = state.joueurs.filter(j => j.id !== id);
+    if (state.rotationIndex >= state.joueurs.length) state.rotationIndex = 0;
+    saveState(); render();
+  }
+  else if (action === 'set-nbtable') {
+    if (state.donnes.length > 0 && state.configured) return;
+    setState({ nbTable: parseInt(btn.dataset.n) });
+  }
+  else if (action === 'commencer') {
+    state.joueurs = state.joueurs.filter(j => j.nom.trim()).map(j => ({ ...j, nom: j.nom.trim() }));
+    if (state.joueurs.length < state.nbTable) return;
+    setState({ configured: true, view: 'home' });
+  }
+
+  // Home
+  else if (action === 'nouvelle-donne') {
+    state.draft = newDraft();
+    setState({ view: 'nouvelle-donne' });
+  }
+  else if (action === 'ouvrir-reglages') {
+    setState({ view: 'reglages' });
+  }
+  else if (action === 'ouvrir-stats') {
+    setState({ view: 'stats' });
+  }
+  else if (action === 'retour-home') {
+    setState({ view: 'home' });
+  }
+  else if (action === 'avancer-rotation') {
+    state.rotationIndex = (state.rotationIndex + 1) % Math.max(1, state.joueurs.length);
+    saveState(); render();
+    toast('Rotation avancée');
+  }
+  else if (action === 'show-donne') {
+    const idx = parseInt(btn.dataset.idx);
+    const donne = state.donnes[idx];
+    if (donne) setState({ modal: { type: 'donne', donneId: donne.id } });
+  }
+  else if (action === 'close-modal') {
+    if (e.target === btn) setState({ modal: null });
+  }
+  else if (action === 'close-modal-btn') {
+    setState({ modal: null });
+  }
+  else if (action === 'delete-donne') {
+    const id = btn.dataset.id;
+    if (!confirm('Supprimer cette donne ?')) return;
+    state.donnes = state.donnes.filter(dn => dn.id !== id);
+    state.modal = null;
+    saveState(); render();
+    toast('Donne supprimée');
+  }
+  else if (action === 'exporter') {
+    exporter();
+  }
+  else if (action === 'toggle-son') {
+    state.options.son = !state.options.son;
+    saveState(); render();
+  }
+
+  // Nouvelle donne
+  else if (action === 'annuler-donne') {
+    state.draft = null;
+    setState({ view: 'home' });
+  }
+  else if (action === 'toggle-table') {
+    const id = btn.dataset.id;
+    const d = state.draft;
+    if (d.joueursTable.includes(id)) {
+      d.joueursTable = d.joueursTable.filter(x => x !== id);
+      d.horsJeu.push(id);
+      if (d.preneur === id) d.preneur = null;
+      if (d.appele === id) d.appele = null;
+    } else {
+      if (d.joueursTable.length >= state.nbTable) {
+        toast(`Maximum ${state.nbTable} joueurs à table`);
+        return;
+      }
+      d.joueursTable.push(id);
+      d.horsJeu = d.horsJeu.filter(x => x !== id);
+    }
+    saveState(); render();
+  }
+  else if (action === 'set-preneur') {
+    state.draft.preneur = btn.dataset.id;
+    if (state.nbTable !== 5) state.draft.appele = null;
+    saveState(); render();
+  }
+  else if (action === 'set-appele') {
+    state.draft.appele = btn.dataset.id;
+    saveState(); render();
+  }
+  else if (action === 'set-contrat') {
+    state.draft.contrat = btn.dataset.k;
+    saveState(); render();
+  }
+  else if (action === 'set-bouts') {
+    state.draft.bouts = parseInt(btn.dataset.n);
+    saveState(); render();
+  }
+  else if (action === 'set-petit') {
+    state.draft.petitAuBout = btn.dataset.k;
+    saveState(); render();
+  }
+  else if (action === 'set-poignee') {
+    state.draft.poignee = btn.dataset.k;
+    saveState(); render();
+  }
+  else if (action === 'set-chelem') {
+    state.draft.chelem = btn.dataset.k;
+    saveState(); render();
+  }
+  else if (action === 'valider-donne') {
+    const d = state.draft;
+    if (d.joueursTable.length !== state.nbTable) return;
+    if (!d.preneur) return;
+    if (state.nbTable === 5 && !d.appele) return;
+    const r = calculerScore(d, d.joueursTable, state.nbTable);
+    const donne = {
+      id: uid(),
+      timestamp: Date.now(),
+      joueursTable: [...d.joueursTable],
+      horsJeu: [...d.horsJeu],
+      preneur: d.preneur,
+      appele: d.appele,
+      contrat: d.contrat,
+      points: d.points,
+      bouts: d.bouts,
+      petitAuBout: d.petitAuBout,
+      poignee: d.poignee,
+      chelem: d.chelem,
+      scores: r.scores,
+    };
+    state.donnes.push(donne);
+    state.draft = null;
+    // Avancer la rotation automatiquement
+    if (state.joueurs.length > state.nbTable) {
+      state.rotationIndex = (state.rotationIndex + 1) % state.joueurs.length;
+    }
+    setState({ view: 'home' });
+    celebrer(donne.preneur, donne.contrat, r.M, r.reussi);
+  }
+
+  // Réglages
+  else if (action === 'supprimer-derniere') {
+    if (state.donnes.length === 0) return;
+    if (!confirm('Supprimer la dernière donne ?')) return;
+    state.donnes.pop();
+    if (state.joueurs.length > state.nbTable) {
+      state.rotationIndex = (state.rotationIndex - 1 + state.joueurs.length) % state.joueurs.length;
+    }
+    saveState(); render();
+    toast('Donne supprimée');
+  }
+  else if (action === 'reset-partie') {
+    if (!confirm('Effacer toute la partie (joueurs + donnes) ?')) return;
+    state = defaultState();
+    saveState(); render();
+  }
+});
+
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  const action = el.dataset.action;
+  if (!action) return;
+
+  if (action === 'edit-name') {
+    const id = el.dataset.id;
+    const j = joueurParId(id);
+    if (j) { j.nom = el.value; saveState(); }
+  }
+  else if (action === 'set-points') {
+    const v = parseFloat(el.value);
+    if (!isNaN(v) && v >= 0 && v <= 91) {
+      state.draft.points = v;
+      saveState();
+      // re-render only the parts affected by points
+      render();
+    }
+  }
+});
+
+// ========= Drag & drop pour la rotation =========
+
+let dragIdx = null;
+
+function attachDragAndDrop() {
+  const list = document.getElementById('players-list');
+  if (!list) return;
+  list.querySelectorAll('.player-row').forEach(row => {
+    row.addEventListener('dragstart', (e) => {
+      dragIdx = parseInt(row.dataset.idx);
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      list.querySelectorAll('.drag-over').forEach(r => r.classList.remove('drag-over'));
+      dragIdx = null;
+    });
+    row.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      list.querySelectorAll('.drag-over').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const targetIdx = parseInt(row.dataset.idx);
+      if (dragIdx === null || dragIdx === targetIdx) return;
+      const [moved] = state.joueurs.splice(dragIdx, 1);
+      state.joueurs.splice(targetIdx, 0, moved);
+      saveState(); render();
+    });
+  });
+}
+
+// ========= Init =========
+
+render();
+
+// Service worker pour fonctionnement offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// Empêcher la perte accidentelle pendant la saisie d'une donne
+window.addEventListener('beforeunload', (e) => {
+  if (state.draft && state.view === 'nouvelle-donne') {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+</script>
+</body>
+</html>
