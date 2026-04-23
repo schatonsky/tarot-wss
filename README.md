@@ -1,0 +1,1 @@
+# tarot-wss
